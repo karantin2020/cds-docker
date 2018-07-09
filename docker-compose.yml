@@ -15,7 +15,7 @@ services:
     image: redis:alpine
     command: redis-server --requirepass cds
     ports:
-      - "localhost:6379:6379"
+      - "127.0.0.1:6379:6379"
 
   cds-migrate:
     image: node3030/cds-engine:latest
@@ -44,8 +44,8 @@ services:
       CDS_API_AUTH_SHAREDINFRATOKEN: changeitchangeitchangeitchangeitchangeitchangeitchangeitchangeit
       CDS_API_SECRETS_KEY: changeitchangeitchangeitchangeit
     ports:
-      - "localhost:8081:8081"
-      - "localhost:8082:8082"
+      - "127.0.0.1:8081:8081"
+      - "127.0.0.1:8082:8082"
     links:
        - cds-db
        - cds-cache
@@ -56,7 +56,7 @@ services:
       BACKEND_HOST: cds-api:8081
       BASE_URL: /
     ports:
-      - "localhost:2015:2015"
+      - "127.0.0.1:2015:2015"
     links:
        - cds-api
 
@@ -94,4 +94,4 @@ services:
 
 volumes:
   cds-artifacts-volume:
-driver: local
+    driver: local

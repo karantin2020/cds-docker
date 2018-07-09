@@ -1,5 +1,5 @@
 FROM	golang:1.10.3-alpine3.7
-RUN	apk --no-cache add libsecret-dev git gcc musl-dev
+RUN	apk --no-cache add libsecret-dev git gcc musl-dev wget
 RUN	mkdir -p /go/src/github.com/ovh; \
 	cd /go/src/github.com/ovh; \
 	git clone --depth=1 https://github.com/ovh/cds
@@ -12,5 +12,6 @@ WORKDIR	/go/src/github.com/ovh/cds/
 FROM 	alpine:3.8
 WORKDIR	/root/
 COPY	--from=0 /go/src/github.com/ovh/cds/cds-engine .
+COPY	--from=0 /go/src/github.com/ovh/cds/engine/sql ./sql
 RUN	apk --no-cache add ca-certificates
 CMD	["/root/cds-engine"]
