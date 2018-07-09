@@ -14,7 +14,7 @@ RUN	cd /app; \
 WORKDIR /app
 
 FROM	alpine:3.8
-WORKDIR	/root/
+WORKDIR	/app/
 COPY	--from=0 /app .
 RUN	apk --no-cache add ca-certificates
-CMD	["/root/setup"]
+CMD	["/app/setup"]

@@ -19,16 +19,16 @@ services:
 
   cds-migrate:
     image: node3030/cds-engine:latest
-    command: /root/cds-engine database upgrade --db-host cds-db --db-user cds --db-password cds --db-name cds --db-sslmode disable  --migrate-dir /root/sql
+    command: /app/cds-engine database upgrade --db-host cds-db --db-user cds --db-password cds --db-name cds --db-sslmode disable  --migrate-dir /app/sql
     links:
        - cds-db
 
   cds-api:
     image: node3030/cds-engine:latest
-    command: sh -c "/root/cds-engine start api"
+    command: sh -c "/app/cds-engine start api"
     volumes:
       # Replace /tmp with a consistent and backuped directory or use a cloud storage
-      - ./volumes/engine:/root/artifacts
+      - ./volumes/engine:/app/artifacts
     environment:
       CDS_API_DATABASE_HOST: cds-db
       CDS_API_URL_API: ${HOSTNAME}:8081
@@ -38,9 +38,9 @@ services:
       CDS_API_CACHE_MODE: redis
       CDS_API_CACHE_REDIS_HOST: cds-cache:6379
       CDS_API_CACHE_REDIS_PASSWORD: cds
-      CDS_API_DIRECTORIES_DOWNLOAD: /root
-      CDS_API_DIRECTORIES_KEYS: /root/keys
-      CDS_API_ARTIFACT_LOCAL_BASEDIRECTORY: /root/artifacts
+      CDS_API_DIRECTORIES_DOWNLOAD: /app
+      CDS_API_DIRECTORIES_KEYS: /app/keys
+      CDS_API_ARTIFACT_LOCAL_BASEDIRECTORY: /app/artifacts
       CDS_API_AUTH_SHAREDINFRATOKEN: changeitchangeitchangeitchangeitchangeitchangeitchangeitchangeit
       CDS_API_SECRETS_KEY: changeitchangeitchangeitchangeit
     ports:
@@ -74,7 +74,7 @@ services:
   # docker run -d -v /var/run/docker.sock:/var/run/docker.sock -p 2376:2375 bobrik/socat TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock
   cds-hatchery-swarm:
     image: node3030/cds-engine:latest
-    command: /root/cds-engine start hatchery:swarm
+    command: /app/cds-engine start hatchery:swarm
     environment:
       CDS_HATCHERY_SWARM_COMMONCONFIGURATION_NAME: hatchery-swarm
       CDS_HATCHERY_SWARM_COMMONCONFIGURATION_API_TOKEN: changeitchangeitchangeitchangeitchangeitchangeitchangeitchangeit
