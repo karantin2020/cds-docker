@@ -7,9 +7,10 @@ RUN	cd /app; \
 RUN	cd /app; \
 	tar xzf ui.tar.gz && mv dist/* .
 RUN	cd /app; \
-	wget https://github.com/ovh/cds/releases/download/0.8.0/caddy-linux-amd64
+	wget -O caddy.tar.gz "https://caddyserver.com/download/linux/amd64?license=personal&telemetry=off"; \
+	wget -O Caddyfile "https://raw.githubusercontent.com/ovh/cds/master/ui/Caddyfile"; \
+	tar xzf caddy.tar.gz caddy
 RUN	cd /app; \
-	mv caddy-linux-amd64 caddy; \
 	chmod +rx caddy setup
 WORKDIR /app
 
