@@ -2,40 +2,48 @@
 # PLEASE READ https://ovh.github.io/cds/hosting/ready-to-run/docker-compose/
 #
 
-version: '3'
+version: '3.5'
 
 services:
   cds-db:
     image: postgres:10.4-alpine
+    container_name: cds-db
     volumes:
       - ./volumes/db/var/lib/postgresql/data:/var/lib/postgresql/data:rw
       - /etc/localtime:/etc/localtime:ro
     environment:
       POSTGRES_PASSWORD: cds
       POSTGRES_USER: cds
+    networks: 
+      - cds-network
 
   cds-cache:
     image: redis:alpine
+    container_name: cds-cache
     command: redis-server --requirepass cds
-    ports:
-      - "127.0.0.1:6379:6379"
-
+    networks: 
+      - cds-network
+    
   cds-migrate:
     image: node3030/cds-engine:latest
+    container_name: cds-migrate
     command: /app/cds-engine database upgrade --db-host cds-db --db-user cds --db-password cds --db-name cds --db-sslmode disable  --migrate-dir /app/sql
     links:
        - cds-db
+    networks: 
+      - cds-network
 
   cds-api:
     image: node3030/cds-engine:latest
+    container_name: cds-api
     command: sh -c "/app/cds-engine start api"
     volumes:
       # Replace /tmp with a consistent and backuped directory or use a cloud storage
       - ./volumes/engine:/app/artifacts
     environment:
       CDS_API_DATABASE_HOST: cds-db
-      CDS_API_URL_API: ${HOSTNAME}:8081
-      CDS_API_URL_UI: ${HOSTNAME}:8080
+      CDS_API_URL_API: localhost:8081
+      CDS_API_URL_UI: localhost:8080
       CDS_API_AUTH_DEFAULTGROUP: cdsdemo
       CDS_LOG_LEVEL: info
       CDS_API_CACHE_MODE: redis
@@ -52,9 +60,12 @@ services:
     links:
        - cds-db
        - cds-cache
+    networks: 
+      - cds-network
 
   cds-ui:
     image: node3030/cds-ui:latest
+    container_name: cds-ui
     environment:
       BACKEND_HOST: cds-api:8081
       BASE_URL: /
@@ -62,6 +73,8 @@ services:
       - "127.0.0.1:2015:2015"
     links:
        - cds-api
+    networks: 
+      - cds-network
 
   # The docker engine must be accessible from this container
   # The hatchery swarm uses standard docker environment variables like
@@ -70,31 +83,39 @@ services:
   # DOCKER_TLS_VERIFY: 1
   #
   # If you don't want to open the docker tcp post, you can bind the docker socket in the volumes section 
-  # and set DOCKER_HOST to unix://var/run/docker.sock
+  # and set DOCKER_HOST to unix:///var/run/docker.sock
   #
   # If your are a Docker for Desktop user (Docker4Mac or Docker4Windows) you will probably have to bind 
   # your docker socket to a tcp port with a socat like
   # docker run -d -v /var/run/docker.sock:/var/run/docker.sock -p 2376:2375 bobrik/socat TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock
   cds-hatchery-swarm:
     image: node3030/cds-engine:latest
+    container_name: cds-hatchery-swarm
     command: /app/cds-engine start hatchery:swarm
     environment:
       CDS_HATCHERY_SWARM_COMMONCONFIGURATION_NAME: hatchery-swarm
       CDS_HATCHERY_SWARM_COMMONCONFIGURATION_API_TOKEN: changeitchangeitchangeitchangeitchangeitchangeitchangeitchangeit
-      # DOCKER_HOST: tcp://${HOSTNAME}:2375
-      DOCKER_HOST: unix://var/run/docker.sock
+      # DOCKER_HOST: tcp://172.17.0.1:2377
+      DOCKER_HOST: unix:///var/run/docker.sock
+      DOCKER_API_VERSION: 1.37
       # DOCKER_CERT_PATH: /Users/me/.docker/machines/.client
       # DOCKER_TLS_VERIFY: 1
       # CDS_HATCHERY_SWARM_COMMONCONFIGURATION_API_HTTP_URL will be use by hatchery to communicate with cds-api
       # and by container spawned by hatchery to download the binary worker from api.
-      CDS_HATCHERY_SWARM_COMMONCONFIGURATION_API_HTTP_URL: http://${HOSTNAME}:8081
+      CDS_HATCHERY_SWARM_COMMONCONFIGURATION_API_HTTP_URL: http://cds-api:8081
       CDS_HATCHERY_SWARM_MAXCONTAINERS: 4
     links:
-       - cds-api
+      - cds-api
     volumes:
-       # Uncomment this to bind the docker socket
-       - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: 
+      - cds-network
 
 volumes:
   cds-artifacts-volume:
     driver: local
+
+networks:
+  cds-network:
+    name: cds-network
+    driver: overlay
