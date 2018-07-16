@@ -95,7 +95,7 @@ services:
     environment:
       CDS_HATCHERY_SWARM_COMMONCONFIGURATION_NAME: hatchery-swarm
       CDS_HATCHERY_SWARM_COMMONCONFIGURATION_API_TOKEN: changeitchangeitchangeitchangeitchangeitchangeitchangeitchangeit
-      # DOCKER_HOST: tcp://172.17.0.1:2377
+      # DOCKER_HOST: tcp://172.17.0.1:2375
       DOCKER_HOST: unix:///var/run/docker.sock
       DOCKER_API_VERSION: 1.37
       # DOCKER_CERT_PATH: /Users/me/.docker/machines/.client
@@ -108,6 +108,20 @@ services:
       - cds-api
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    networks: 
+      - cds-network
+
+  cds-hatchery-local:
+    image: node3030/cds-engine:latest
+    container_name: cds-hatchery-local
+    command: sh -c "PATH=$PATH:/app /app/cds-engine start hatchery:local"
+    environment:
+      CDS_HATCHERY_LOCAL_COMMONCONFIGURATION_NAME: hatchery-local
+      CDS_HATCHERY_LOCAL_COMMONCONFIGURATION_API_TOKEN: changeitchangeitchangeitchangeitchangeitchangeitchangeitchangeit
+      CDS_HATCHERY_LOCAL_COMMONCONFIGURATION_API_HTTP_URL: http://cds-api:8081
+      CDS_HATCHERY_LOCAL_NBPROVISION: 5
+    links:
+      - cds-api
     networks: 
       - cds-network
 
