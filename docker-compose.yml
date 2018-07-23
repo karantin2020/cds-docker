@@ -91,7 +91,7 @@ services:
   cds-hatchery-swarm:
     image: node3030/cds-engine:latest
     container_name: cds-hatchery-swarm
-    command: /app/cds-engine start hatchery:swarm
+    command: sh -c "/app/cds-engine start hatchery:swarm"
     environment:
       CDS_HATCHERY_SWARM_COMMONCONFIGURATION_NAME: hatchery-swarm
       CDS_HATCHERY_SWARM_COMMONCONFIGURATION_API_TOKEN: changeitchangeitchangeitchangeitchangeitchangeitchangeitchangeit
@@ -103,7 +103,13 @@ services:
       # CDS_HATCHERY_SWARM_COMMONCONFIGURATION_API_HTTP_URL will be use by hatchery to communicate with cds-api
       # and by container spawned by hatchery to download the binary worker from api.
       CDS_HATCHERY_SWARM_COMMONCONFIGURATION_API_HTTP_URL: http://cds-api:8081
-      CDS_HATCHERY_SWARM_MAXCONTAINERS: 4
+      CDS_HATCHERY_SWARM_MAXCONTAINERS: 5 # Max Containers on Host managed by this Hatchery. Default: 10
+      # CDS_HATCHERY_SWARM_RATIOSERVICE: 75 # Percent reserved for spawning worker with service requirement
+      # CDS_HATCHERY_SWARM_DEFAULTMEMORY: 1024 # Worker default memory in Mo
+      # CDS_HATCHERY_SWARM_WORKERTTL: 10 # Worker TTL (minutes)
+      # CDS_HATCHERY_SWARM_DOCKEROPTS: # Docker Options. --add-host and --privileged supported
+      # CDS_DEBUG_ENABLE: "true"
+      # CDS_LOG_LEVEL: debug
     links:
       - cds-api
     volumes:
@@ -125,9 +131,9 @@ services:
     networks: 
       - cds-network
 
-volumes:
-  cds-artifacts-volume:
-    driver: local
+# volumes:
+#   cds-artifacts-volume:
+#     driver: local
 
 networks:
   cds-network:

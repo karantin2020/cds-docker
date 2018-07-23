@@ -6,8 +6,7 @@ RUN	mkdir -p /go/src/github.com/ovh; \
 RUN	go get -u -v github.com/ovh/cds/engine
 RUN	cd /go/src/github.com/ovh/cds; \
 	CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -v -o ./build/cds-engine ./engine; \
-	chmod +x ./build/cds-engine
-RUN	cd /go/src/github.com/ovh/cds; \
+	chmod +x ./build/cds-engine; \
 	CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -v -o ./build/worker ./engine/worker; \
 	chmod +x ./build/worker
 WORKDIR	/go/src/github.com/ovh/cds/
